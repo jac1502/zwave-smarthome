@@ -38,16 +38,19 @@ myAppController.controller('AppModuleAlpacaController', function ($scope, $route
     };
     // Where the route comes from
     $scope.fromRoute = function(route){
-        if(route.current && route.current.routeName){
-            switch(route.current.routeName){
-                case 'automation':
-                $scope.moduleId.fromRoute = route.current.routeName + '/' + route.current.params['moduleId']
+            switch(route){
+                case '/apps/instance':
+                case '/rules':
+                case '/wifiplug/add':
+                case '/wifiplug/manage':
+                case '/camera/add':
+                case '/camera/manage':
+                $scope.moduleId.fromRoute = route
                 break;
-            }
-        }
-    };
-    $scope.fromRoute(cfg.route);
 
+            }
+    };
+    $scope.fromRoute(cfg.route.previous);
 
     $scope.onLoad = function () {
         myCache.remove('instances');
@@ -117,10 +120,10 @@ myAppController.controller('AppModuleAlpacaController', function ($scope, $route
 
             }, function (error) {
                 $scope.loading = false;
-                alertify.alertError($scope._t('error_load_data'));
+                angular.extend(cfg.route.alert, {message: $scope._t('error_load_data')});
             });
         }, function (error) {
-            alertify.alertError($scope._t('error_load_data'));
+          angular.extend(cfg.route.alert, {message: $scope._t('error_load_data')});
             $scope.loading = false;
         });
     };
@@ -175,11 +178,11 @@ myAppController.controller('AppModuleAlpacaController', function ($scope, $route
                 $('#alpaca_data').alpaca(formData);
 
             }, function (error) {
-                alertify.alertError($scope._t('error_load_data'));
+              angular.extend(cfg.route.alert, {message: $scope._t('error_load_data')});
                 $scope.loading = false;
             });
         }, function (error) {
-            alertify.alertError($scope._t('error_load_data'));
+          angular.extend(cfg.route.alert, {message: $scope._t('error_load_data')});
             $scope.loading = false;
         });
 
@@ -233,10 +236,10 @@ myAppController.controller('AppModuleAlpacaController', function ($scope, $route
 
             }, function (error) {
                 $scope.loading = false;
-                alertify.alertError($scope._t('error_load_data'));
+                angular.extend(cfg.route.alert, {message: $scope._t('error_load_data')});
             });
         }, function (error) {
-            alertify.alertError($scope._t('error_load_data'));
+          angular.extend(cfg.route.alert, {message: $scope._t('error_load_data')});
             $scope.loading = false;
         });
     }

@@ -32,7 +32,7 @@ myAppController.controller('MySettingsController', function($scope, $window, $co
             // Error message
             if (profile.state === 'rejected') {
                 $scope.loading = false;
-                alertify.alertError($scope._t('error_load_data'));
+                angular.extend(cfg.route.alert, {message: $scope._t('error_load_data')});
                 return;
             }
             // Success - profile
@@ -47,7 +47,6 @@ myAppController.controller('MySettingsController', function($scope, $window, $co
         });
     };
     $scope.allSettled();
-
     /**
      * Assign device to the list
      */
@@ -166,6 +165,37 @@ myAppController.controller('MySettingsController', function($scope, $window, $co
 
     };
 
+    /**
+     *  Add Qrcode
+     */
+    $scope.addQRCode = function() {
+        alertify.prompt($scope._t('verify_qrcode'),$scope._t('lb_password'), function(evt, pass) {
+            console.log("Password", pass)
+            var data = {
+                "password": pass
+            };
+            $scope.loading = {status: 'loading-spin', icon: 'fa-spinner fa-spin', message: $scope._t('updating')};
+            dataFactory.putApi('profiles', 'qrcode/'+$scope.input.id, data).then(function(response) {
+                $scope.loading = false;
+                dataService.showNotifier({message: $scope._t('success_updated')});
+                $timeout(function () {
+                    $window.location.reload();
+                }, 2000);
+            }, function(error) {
+                $scope.loading = false;
+                console.log(error);
+                if(error.data.error == "wrong_password") {
+                    alertify.alertError($scope._t('wrong_password'));    
+                } else {
+                    alertify.alertError($scope._t('error_update_data'));
+                }
+            });
+            
+
+
+        }).set('type', 'password');
+    }
+
     /// --- Private functions --- ///
     /**
      * Load devices
@@ -177,13 +207,4 @@ myAppController.controller('MySettingsController', function($scope, $window, $co
     }
     ;
 
-});
-
-/**
- * The controller that renders QR code.
- * @class ManagementAddMobileDevice
- */
-
-myAppController.controller('ManagementAddMobileDevice', function ($scope) {
-    $scope.qrcode = $scope.user.qrcode;
 });

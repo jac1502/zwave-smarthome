@@ -27,13 +27,12 @@ myAppFactory.factory('_', function () {
  * @class dataFactory
  */
 myAppFactory.factory('dataFactory', function ($http, $filter, $q, myCache, $interval,dataService, cfg, _) {
-    var updatedTime = Math.round(+new Date() / 1000);
+    var updatedTime = 0;
     var lang = cfg.lang;
     var ZWAYSession = dataService.getZWAYSession();
     var user = dataService.getUser();
     if (user) {
         lang = user.lang;
-
     }
     var pingInterval = null;
     return({
@@ -41,6 +40,7 @@ myAppFactory.factory('dataFactory', function ($http, $filter, $q, myCache, $inte
         logInApi: logInApi,
         sessionApi: sessionApi,
         getApiLocal: getApiLocal,
+        runJs: runJs,
         getApi: getApi,
         deleteApi: deleteApi,
         deleteApiFormdata: deleteApiFormdata,
@@ -56,7 +56,6 @@ myAppFactory.factory('dataFactory', function ($http, $filter, $q, myCache, $inte
         xmlToJson: xmlToJson,
         uploadApiFile: uploadApiFile,
         putCfgXml: putCfgXml,
-        //getJSCmd: getJSCmd,
         refreshZwaveApiData: refreshZwaveApiData,
         getSystemCmd: getSystemCmd,
         getLanguageFile: getLanguageFile,
@@ -166,6 +165,27 @@ myAppFactory.factory('dataFactory', function ($http, $filter, $q, myCache, $inte
     }
 
     /**
+     * Run zway JS
+     * @param {string} param
+     * @returns {unresolved}
+     */
+    function runJs(params) {
+      return $http({
+         method: "get",
+         url: cfg.server_url + cfg.zwave_jsrun_url + params,
+         headers: {
+          'Accept-Language': lang,
+          'ZWAYSession': ZWAYSession
+         }
+     }).then(function (response) {
+         return response;
+     }, function (response) {// something went wrong
+         //return response;
+         return $q.reject(response);
+     });
+ }
+
+    /**
      * Get ZAutomation api data
      * @param {string} api
      * @param {string} params
@@ -206,7 +226,7 @@ myAppFactory.factory('dataFactory', function ($http, $filter, $q, myCache, $inte
 
         }, function (response) {// something went wrong
             if (_.isObject(fatalError)) {
-                angular.extend(cfg.route.fatalError, fatalError);
+                angular.extend(cfg.route.alert, fatalError);
                 //response.fatalError = fatalError;
             }
             return $q.reject(response);
@@ -525,7 +545,10 @@ myAppFactory.factory('dataFactory', function ($http, $filter, $q, myCache, $inte
      * @param {string} params
      * @returns {unresolved}
      */
-    function refreshApi(api, params) {
+    function refreshApi(api, params, updateTime) {
+        if(updateTime || typeof updateTime !== 'undefined') {
+            updatedTime = updateTime;
+        }
         if(_.findWhere($http.pendingRequests,{failWait: api})){
             return $q.reject('Pending');
         }
@@ -533,10 +556,12 @@ myAppFactory.factory('dataFactory', function ($http, $filter, $q, myCache, $inte
          if (api === 'notifications' && updatedTime.toString().length === 10) {
             updatedTime = updatedTime * 1000;
         }
+
         return $http({
             method: 'get',
             url: cfg.server_url + cfg.api[api] + '?since=' + updatedTime + (params ? params : ''),
             failWait:api,
+            timeout: cfg.pending_timeout_limit,
             headers: {
                 'Accept-Language': lang,
                 'ZWAYSession': ZWAYSession,
@@ -639,6 +664,9 @@ myAppFactory.factory('dataFactory', function ($http, $filter, $q, myCache, $inte
         });
     }
 
+     
+
+
     /**
      * Get data holder from ZWaveAPI api
      * @param {boolean} noCache
@@ -669,7 +697,7 @@ myAppFactory.factory('dataFactory', function ($http, $filter, $q, myCache, $inte
         }, function (response) {
             // something went wrong
             if(response.status !== 403){
-                angular.extend(cfg.route.fatalError, {
+                angular.extend(cfg.route.alert, {
                     message: cfg.route.t['error_zwave_network'],
                     info: cfg.route.t['how_to_resolve_zwave_errors'],
                     hide: false,

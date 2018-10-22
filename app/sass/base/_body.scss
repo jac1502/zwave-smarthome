@@ -24,6 +24,12 @@
 html {
   font-size: $app-body-font-size;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+   
+  @include mediaQueries(max-small) {
+    -webkit-touch-callout: none; /* Disables long-touch menu */
+    -webkit-user-select: none; /* Disable text selection (for Webkit) */
+    user-select: none; /* Disable text selection (standard syntax) */
+  }
 }
 
 body {
@@ -31,7 +37,7 @@ body {
   font-size: $app-body-font-size;
   line-height: $app-line-height-base;
   color: $app-body-color;
-  background-color: #FFFFFF;
+  background-color: $app-bcg-color;
   background-image: url('wallpaper.png');
   // Media queries
   @include mediaQueries(min-small) {
@@ -93,6 +99,12 @@ h4 {
 .item-cnt {
   font-size: 80%;
 }
+
+.subhead-info {
+  display: block;
+  font-size: 90%;
+}
+
 .small{
     font-size: 90%;
      color: lighten($app-body-color, 40%);
@@ -198,8 +210,8 @@ a {
 }
 
 .block{
-  width: 100%;
- margin: $spacing 0;
+  //width: 100%;
+ margin: $spacing;
 }
 
 .block-50 {
@@ -215,6 +227,14 @@ a {
 -------------------------------------------------- */
 img {
   vertical-align: middle;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  user-drag: none;
+  -webkit-touch-callout: none;
+
 }
 .img-circle{
   border-radius: 50%;
@@ -227,6 +247,9 @@ img {
 
 /* Others
 -------------------------------------------------- */
+.section{
+  margin-top: $spacing;
+}
 .timestamp {
   color: lighten($app-color-primary, 20%);
   font-size: 17px;
@@ -248,17 +271,33 @@ img {
 }
 
 .bcg-active.false, .bcg-danger {
-  background-color: $app-bcg-danger;
+  background-color: $app-bcg-danger !important; 
 }
 
 .clickable {
   cursor: pointer;
 }
 
+.btn-static {
+  background-color: #ffffff;
+  border: 1px solid lightgrey;
+  cursor: default;
+  &:active, &:hover, &:focus {
+    @include box-shadow(none);
+  }
+}
+
 .text-supp {
   font-style: italic;
   color: lighten($app-body-color, 30%);
 }
+.uppercase{
+  text-transform: uppercase;
+}
+.lowercase{
+  text-transform: lowercase;
+}
+
 
 .badge {
   padding: $spacing-half;
@@ -270,6 +309,7 @@ img {
   font-size: 95%;
   font-style: italic;
   margin: $spacing-half 0;
+  padding-right: $spacing-half;
 }
 
 .inline .help-text {
@@ -307,4 +347,9 @@ img {
 .scrollh{
     overflow-y: auto;
     white-space: nowrap;
+}
+
+// Show element
+.ng-show{
+  display: block !important;
 }
